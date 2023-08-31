@@ -1,0 +1,362 @@
+<html>
+	<head>
+		<title>imagination-webui</title>
+	</head>
+	<body>
+		<style>
+		  body {
+		    font-family: Arial, sans-serif;
+		    background-color: #f2f2f2;
+		    margin: 0;
+		    padding: 0;
+		    display: flex;
+		    flex-direction: column;
+		    align-items: center;
+		    justify-content: center;
+		    height: 100vh;
+		  }
+		  
+		  .container {
+		    background-color: white;
+		    border-radius: 10px;
+		    padding: 20px;
+			      overflow-y: scroll;
+		    box-shadow: 0px 2px 10px rgba(0, 0, 0, 0.1);
+		    width: 80%;
+		    max-width: 600px;
+		  }
+		  
+		  h1 {
+		    font-size: 24px;
+		    margin-bottom: 10px;
+		  }
+		  
+		  label {
+		    display: block;
+		    margin-bottom: 5px;
+			      font-family: ui-monospace;
+		  }
+		  
+		  input {
+		    width: 100%;
+		    padding: 10px;
+		    border: 1px solid #ccc;
+		    border-radius: 5px;
+		  }
+		  input[type="range"] {
+  width: 90%;
+			  padding: 0;
+}
+		  .output-panel {
+		    display: flex;
+		    flex-wrap: wrap;
+		    gap: 10px;
+		  }
+		  
+		  .output-image {
+		    width: calc(33.33% - 10px);
+			      height: calc(33.33% - 10px);
+		    border-radius: 5px;
+		    box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.1);
+		  }
+			button {
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  padding: 10px 20px;
+  cursor: pointer;
+  transition: background-color 0.3s, transform 0.2s, box-shadow 0.3s;
+}
+
+button:hover {
+  background-color: #0056b3;
+  transform: scale(1.05);
+  box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+button:active {
+  background-color: #0056b3;
+  transform: scale(0.95);
+  box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.2);
+}
+			select {
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  padding: 10px 20px;
+  cursor: pointer;
+  transition: background-color 0.3s, transform 0.2s;
+}
+
+select:hover {
+  background-color: #0056b3;
+}
+select option {
+  background-color: white;
+  color: black;
+}
+select:focus {
+  outline: none;
+  box-shadow: 0px 0px 5px rgba(0, 123, 255, 0.5);
+}
+
+.style-pod {
+  list-style: none;
+  display: flex;
+  padding: 0;
+}
+
+.style-pod li {
+  cursor: pointer;
+  padding: 10px;
+  border: 1px solid #ccc;
+  margin-right: 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.style-pod li.selected {
+  border-color: #007bff;
+}
+
+.style-pod li div.aspect-wide,
+.style-pod li div.aspect-square,
+.style-pod li div.aspect-tall {
+  width: 50px;
+  height: 50px;
+  background-color: #ccc;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.style-pod li div.aspect-wide {
+  	border: solid 3px;
+	border-radius: 5px;
+	background-color: white;
+	width: 45px;
+	height: 30px;
+}
+
+.style-pod li div.aspect-square {
+  	border: solid 3px;
+	border-radius: 5px;
+	background-color: white;
+	height: 30px;
+    width: 30px;
+}
+
+.style-pod li div.aspect-tall {
+  	border: solid 3px;
+	border-radius: 5px;
+	background-color: white;
+	height: 45px;
+    width: 30px;
+}
+
+.style-pod li .name {
+  margin-top: 5px;
+  font-size: 10px;
+}
+		</style>
+		<div class="container">
+<label for="positive-prompt">Positive Prompt:</label>
+    <div class="input-with-count">
+      <input type="text" id="positive-prompt" oninput="countTags(this)">
+      <span class="word-count">0 tags</span>
+    </div>
+			<div id="nagative-prompt-div">
+	    <label for="negative-prompt">Negative Prompt:</label>
+	    <div class="input-with-count">
+	      <input type="text" id="negative-prompt" oninput="countTags(this)">
+	      <span class="word-count">0 tags</span>
+	    </div>
+			</div>
+			<div id="customizeable-size">
+			 	<label for="width-slider">Width:</label>
+			    <input type="range" id="width-slider" min="100" max="1000" value="512" oninput="updateValue('width-value', this.value)">
+			    <span id="width-value">512</span>
+			    <label for="height-slider">Height:</label>
+			    <input type="range" id="height-slider" min="100" max="1000" value="512" oninput="updateValue('height-value', this.value)">
+			    <span id="height-value">512</span>
+			</div>
+			<div id="templateable-size">
+			<ul class="style-pod plate" id="generator-aspect-selector">
+                                <li id="aspect-wide" data="wide"><div class="aspect-wide"></div><div class="name">Wide</div></li>
+                                <li id="aspect-square" data="square" class="selected"><div class="aspect-square"></div><div class="name">Square</div></li>
+                                <li id="aspect-tall" data="tall"><div class="aspect-tall"></div><div class="name">Tall</div></li>
+                            </ul>
+			</div>
+			<div id="batch-div">
+		    <label for="batch-slider">Batch Count:</label>
+		    <input type="range" id="batch-slider" min="1" max="100" value="1" oninput="updateValue('batch-value', this.value)">
+		    <span id="batch-value">1</span>
+			</div>
+		    <button onclick="generateMT()">Generate Images</button>
+			<select id="service">
+				<option>PixlrX</option>
+				<option>freeimagegenerator</option>
+				<option>hotpot</option>
+				<option>deepai</option>
+			</select>
+			<button onclick="downloadImages()">Download Images</button>
+			<button onclick="clearImages()">Clear Images</button>
+		    <div class="output-panel">
+		    </div>
+		  </div>
+		<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+		<script>
+			const services = {
+				'PixlrX': {
+					customizeableSize: false,
+					templateableSize: true,
+					supportsNegative: true,
+					supportsBatchs: true
+				},
+				freeimagegenerator: {
+					customizeableSize: false,
+					templateableSize: false,
+					supportsNegative: false,
+					supportsBatchs: false
+				},
+				hotpot: {
+					customizeableSize: false,
+					templateableSize: false,
+					supportsNegative: true,
+					supportsBatchs: true
+				},
+				deepai: {
+					customizeableSize: false,
+					templateableSize: false,
+					supportsNegative: false,
+					supportsBatchs: true
+				}
+			};
+			function setSizesVisiblity() {
+				const service = services[document.getElementById('service').value];
+				document.getElementById('customizeable-size').hidden = !service.customizeableSize;
+				document.getElementById('templateable-size').hidden = !service.templateableSize;
+				document.getElementById('nagative-prompt-div').hidden = !service.supportsNegative;
+				document.getElementById('batch-div').hidden = !service.supportsBatchs;
+			}
+			function getSize() {
+				if(!document.getElementById('customizeable-size').hidden) {
+					return [document.getElementById('width-slider').value, document.getElementById('height-slider').value]
+				}
+				else if(!document.getElementById('templateable-size').hidden) {
+					const value = document.querySelector('.selected');
+
+					if(value.getAttribute('data') == 'wide') return [768, 512];
+					if(value.getAttribute('data') == 'square') return [512, 512];
+					if(value.getAttribute('data') == 'tall') return [512, 768];
+				}
+				else return [512, 512]
+			}
+			setSizesVisiblity()
+			document.getElementById('service').onchange = setSizesVisiblity;
+			$(document).ready(function() {
+			    $('.style-pod li').click(function() {
+			      $('.style-pod li').removeClass('selected');
+			      $(this).addClass('selected');
+			    });
+			  });
+			function clearImages() {
+				const panel = document.querySelector('.output-panel');
+				panel.innerHTML = '';
+			}
+			function downloadImages() {
+      const images = document.querySelectorAll('.output-panel img');
+      images.forEach((img, index) => {
+        const base64Data = img.src.split(',')[1];
+        const blob = base64ToBlob(base64Data, 'image/png');
+        const url = URL.createObjectURL(blob);
+
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `image_${index + 1}.png`;
+        a.style.display = 'none';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+      });
+    }
+			function base64ToBlob(base64Data, contentType) {
+      const sliceSize = 1024;
+      const byteCharacters = atob(base64Data);
+      const byteArrays = [];
+      for (let offset = 0; offset < byteCharacters.length; offset += sliceSize) {
+        const slice = byteCharacters.slice(offset, offset + sliceSize);
+        const byteNumbers = new Array(slice.length);
+        for (let i = 0; i < slice.length; i++) {
+          byteNumbers[i] = slice.charCodeAt(i);
+        }
+        const byteArray = new Uint8Array(byteNumbers);
+        byteArrays.push(byteArray);
+      }
+      return new Blob(byteArrays, { type: contentType });
+    }
+			function countTags(inputField) {
+      const wordCountSpan = inputField.nextElementSibling;
+      const wordCount = inputField.value.trim().split(/\s+/).filter(Boolean).length;
+      wordCountSpan.textContent = `${wordCount} ${wordCount === 1 ? 'tag' : 'tags'}`;
+    }
+			 function updateValue(spanId, value) {
+      document.getElementById(spanId).textContent = value;
+    }
+			function generateMT() {
+				const size = document.getElementById('batch-slider').value;
+				document.getElementById('batch-slider').value = 1;
+				updateValue('batch-value', 1);
+				for(let i = 0; i < size; i++) {
+					generateImage();
+				};
+			};
+			async function generateImage() {
+				const positivePrompt = document.getElementById('positive-prompt').value;
+				const negativePrompt = document.getElementById('negative-prompt').value;
+				const service = document.getElementById('service').value;
+				const [ width, height ] = getSize();
+				const amount = document.getElementById('batch-slider').value;
+				
+				const requestBody = {
+					positive: positivePrompt,
+					negative: negativePrompt,
+					service,
+					width,
+					height,
+					amount
+				};
+
+				try {
+					const response = await fetch('/generate', {
+					  method: 'POST',
+					  headers: {
+						'Content-Type': 'application/json'
+					  },
+					  body: JSON.stringify(requestBody)
+					});
+					
+					if (!response.ok) {
+					  throw new Error('Request failed');
+					}
+					
+					const responseBody = await response.json();
+					
+					const outputPanel = document.querySelector('.output-panel');
+					for(let i in responseBody) {
+						const imgElement = document.createElement('img');
+				        imgElement.src = responseBody[i];
+				        imgElement.classList.add('output-image');
+				        outputPanel.appendChild(imgElement);
+					};
+				} catch (error) {
+					console.error('Error:', error);
+				}
+			};
+		</script>
+	</body>
+</html>
